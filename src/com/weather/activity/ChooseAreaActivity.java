@@ -13,6 +13,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.view.ViewDebug.IntToString;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -51,6 +52,8 @@ public class ChooseAreaActivity extends Activity {
 	private City selectedCity;//选中的城市
 	
 	private int currentLevel;//当前选中的级别 默认为0，即省份
+	
+	private boolean isFromWeatherActivity;//是否从WeatherActivity中传来
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -60,9 +63,10 @@ public class ChooseAreaActivity extends Activity {
 		
 		init();
 		
+		isFromWeatherActivity = getIntent().getBooleanExtra("from_weather_activity", false);
 		//查看在本地是否存有天气信息，若有跳到显示WeatherActivity界面
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-		if (prefs.getBoolean("city_selected", false)){
+		if (prefs.getBoolean("city_selected", false) && !isFromWeatherActivity){
 			Intent intent = new Intent(this, WeatherActivity.class);
 			startActivity(intent);
 			finish();
@@ -132,6 +136,11 @@ public class ChooseAreaActivity extends Activity {
 		}else if (currentLevel == LEVEL_COUNTY){
 			queryCities();
 		}else{
+			//此处由于在现实全国省份列表中，按返回键时，返回weatheractivity界面
+			if (isFromWeatherActivity){
+				Intent intent = new Intent(this, WeatherActivity.class);
+				startActivity(intent);
+			}
 			finish();
 		}
 	}
